@@ -1,0 +1,47 @@
+#!/bin/sh
+#
+# Run-level Startup script for nethook
+#
+# chkconfig: 2345 9 91
+# description: Run scripts when network interfaces change state
+
+case "$1" in
+    start)
+        echo -n "Starting nethook: "
+        /usr/local/sbin/nethook
+        echo "OK"
+        ;;
+    stop)
+        echo -n "Stopping nethook: "
+        /usr/local/sbin/nethook stop
+        echo "OK"
+        ;;
+    status)
+        STATUS=$(/usr/local/sbin/nethook status)
+        if echo $STATUS | grep -q 'Running: yes'
+        then
+            echo "nethook is running"
+            exit 0
+        elif echo $STATUS | grep -q 'Running: no'
+        then
+            echo "nethook is dead and /var/run pid file exists"
+            exit 1
+        elif echo $STATUS | grep -q 'No pidfile found'
+        then
+            echo "nethook is not running"
+            exit 3
+        else
+            echo "nethook status is unknown"
+            exit 4
+        fi
+        ;;
+    restart)
+        $0 stop
+        $0 start
+        ;;
+    *)
+        echo "Usage: $0 start|stop|restart|status"
+        exit 1
+esac
+
+exit 0
